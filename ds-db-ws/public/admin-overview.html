@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="icon" type="image/png" href="LZDTLOGO.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+    
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">My Products</a>
+        <div class="collapse navbar-collapse justify-content-end">
+          <ul class="navbar-nav">
+            <li id="admin-dashboard-link" class="nav-item">
+              <a class="nav-link" href="/admin-overview.html">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <form method="POST" action="/logout">
+                <button type="submit" class="btn btn-link nav-link">Logout</button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+<div class="container mt-5">
+  <h1 class="mb-4">Admin Overview</h1>
+
+  <button class="btn btn-outline-primary me-2" onclick="loadDashboard('quarterly')">Quarterly</button>
+  <button class="btn btn-outline-secondary" onclick="loadDashboard('yearly')">Yearly</button>
+
+  <div id="dashboard-content" class="mt-4"></div>
+</div>
+  <script>
+    async function loadDashboard(view = 'yearly') {
+      const res = await fetch('/api/admin/dashboard');
+      const data = await res.json();
+  
+      const content = document.getElementById('dashboard-content');
+      content.innerHTML = `
+        <h4>Employee Sales</h4>
+        <table class="table table-bordered">
+          <thead><tr><th>Name</th><th>Sales Count</th><th>Total Sales (€)</th></tr></thead>
+          <tbody>
+            ${data.employeeSales.map(e => `
+              <tr><td>${e.Name} ${e.Surname}</td><td>${e.SalesCount}</td><td>${parseFloat(e.TotalSales || 0).toFixed(2)}</td></tr>
+            `).join('')}
+          </tbody>
+        </table>
+  
+        <h4>Employee Completed Maintenances</h4>
+        <table class="table table-bordered">
+          <thead><tr><th>Name</th><th>Maintenances Done</th><th>Average Maintenance Completion Time</th></tr></thead>
+          <tbody>
+            ${data.maintenanceStats.map(m => `
+              <tr><td>${m.Name} ${m.Surname}</td><td>${m.MaintenanceDone}</td><td>${parseFloat(data.averageMaintenanceTime || 0).toFixed(2)} minutes</td></tr>
+            `).join('')}
+          </tbody>
+        </table>
+  
+        <h4>Customer Purchases</h4>
+        <table class="table table-bordered">
+          <thead><tr><th>Name</th><th>Purchases</th><th>Total Spent (€)</th></tr></thead>
+          <tbody>
+            ${data.customerTotals.map(c => `
+              <tr><td>${c.CustomerName} ${c.CustomerSurName}</td><td>${c.Purchases}</td><td>${parseFloat(c.TotalSpent || 0).toFixed(2)}</td></tr>
+            `).join('')}     
+          </tbody>
+        </table>
+  
+                <h4>Procurement Stats</h4>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Total Procurements</td>
+              <td>${data.totalProcurements}</td>
+            </tr>
+            <tr>
+              <td>Average Procurement Value</td>
+              <td>€${parseFloat(data.avgProcurementValue).toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td>Revenue Split</td>
+              <td>
+                <ul class="mb-0">
+                  ${data.revenueSplit.map(r => `
+                    <li>${r.Type}: €${parseFloat(r.Revenue).toFixed(2)}</li>
+                  `).join('')}
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td>Total Revenue</td>
+              <td>€${parseFloat(data.totalRevenue).toFixed(2)}</td>
+            </tr>
+            
+          </tbody>
+        </table>
+
+
+      `;
+    }
+  
+    loadDashboard();
+  </script>
+</body>
+</html>
